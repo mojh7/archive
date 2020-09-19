@@ -1,5 +1,5 @@
 /*
- * 2020-09-11
+ * 2020-09-19
  * https://programmers.co.kr/learn/courses/30/lessons/60060
  * 프로그래머스 2020 KAKAO BLIND RECRUITMENT 가사 검색
 
@@ -17,6 +17,8 @@ words를 1차원 배열에 두었는데 2차원 배열로 두어 List<String>[]
  - 효율성 틀림
 
 trie? 쪽 써야 될 것 같다.
+
+관련 글 참고하여 trie 사용하여 해결
 */
 
 
@@ -230,3 +232,145 @@ new LinkedList<String>(); 초기화 하고 사용했더니 정확성 쪽에서 �
 테스트 5 〉	통과 (26.26ms, 79.7MB)
 
 */
+trie로 구현하였으나 와일드카드 이전까지 TrieNode까지 탐색하고 그 이후에 cnt를 셀 때
+bfs로 모든 노드를 탐색하여 cnt를 세니 효율성 테스트에서 x
+tire에 string을 insert할 때 거쳐가는 node에서 각각 cnt를 증가시켜
+각 node마다 하위에 자식 노드의 갯수를 가져서 바로 cnt를 출력하여 해결
+
+테스트 1 〉	통과 (2.43ms, 52.6MB)
+테스트 2 〉	통과 (1.32ms, 53.2MB)
+테스트 3 〉	통과 (1.88ms, 53.3MB)
+테스트 4 〉	통과 (1.85ms, 52.6MB)
+테스트 5 〉	통과 (1.35ms, 52.1MB)
+테스트 6 〉	통과 (1.65ms, 53MB)
+테스트 7 〉	통과 (11.69ms, 54.3MB)
+테스트 8 〉	통과 (8.39ms, 54.4MB)
+테스트 9 〉	통과 (14.54ms, 53.2MB)
+테스트 10 〉	통과 (10.80ms, 53.9MB)
+테스트 11 〉	통과 (14.23ms, 53.9MB)
+테스트 12 〉	통과 (12.77ms, 54.4MB)
+테스트 13 〉	통과 (48.62ms, 60.3MB)
+테스트 14 〉	통과 (24.92ms, 55.8MB)
+테스트 15 〉	통과 (34.90ms, 60MB)
+테스트 16 〉	통과 (44.68ms, 60.3MB)
+테스트 17 〉	통과 (30.28ms, 56.7MB)
+테스트 18 〉	통과 (36.86ms, 59.3MB)
+효율성  테스트
+테스트 1 〉	실패 (시간 초과)
+테스트 2 〉	실패 (시간 초과)
+테스트 3 〉	실패 (368.06ms, 243MB)
+테스트 4 〉	통과 (483.51ms, 275MB)
+테스트 5 〉	통과 (490.72ms, 449MB)
+*/
+
+class Solution {
+    public int[] solution(String[] words, String[] queries) {
+        int[] answer = new int[queries.length];
+        Trie[] tries = new Trie[10001];
+        Trie[] reverseTries = new Trie[10001];
+        StringBuffer sb = new StringBuffer();
+        int wordLen = 0;
+        int s, e, m;
+
+        for(String word : words) {
+            wordLen = word.length();
+            if(tries[wordLen] == null) {
+                tries[wordLen] = new Trie();
+            }
+            if(reverseTries[wordLen] == null) {
+                reverseTries[wordLen] = new Trie();
+            }
+
+            tries[wordLen].insert(word);
+            sb.delete(0, sb.length());
+            sb.append(word);
+            reverseTries[wordLen].insert(sb.reverse().toString());
+        }
+
+        for(int i = 0; i < queries.length; i++) {
+            s = 0;
+            e = queries[i].length() - 1;
+            if(queries[i].charAt(e) == '?') {
+                if(tries[queries[i].length()] == null) {
+                    answer[i] = 0;
+                    continue;
+                }
+                while(s < e) {
+                    m = (s + e) / 2;
+                    if(queries[i].charAt(m) != '?') {
+                        s = m + 1;
+                    } else {
+                        e = m;
+                    }
+                }
+                answer[i] = tries[queries[i].length()].getMatchedWordsCnt(queries[i], s);
+            } else {
+                if(reverseTries[queries[i].length()] == null) {
+                    answer[i] = 0;
+                    continue;
+                }
+                while(s < e) {
+                    m = (s + e) / 2;
+                    if(queries[i].charAt(m) != '?') {
+                        e = m;
+                    } else {
+                        s = m + 1;
+                    }
+                }
+                sb.delete(0, sb.length());
+                sb.append(queries[i]);
+                answer[i] = reverseTries[queries[i].length()].getMatchedWordsCnt(sb.reverse().toString(), queries[i].length() - e);
+            }
+        }
+        return answer;
+    }
+}
+
+class TrieNode {
+    TrieNode[] childern;
+    int cnt = 0;
+
+    public TrieNode() {
+        childern = new TrieNode[26];
+        cnt = 0;
+    }
+}
+
+class Trie {
+    TrieNode root;
+
+    public Trie() {
+        root = new TrieNode();
+    }
+
+    public void insert(String word) {
+        TrieNode cur = root;
+        int charToIdx = 0;
+        for(char c : word.toCharArray()) {
+            charToIdx = c - 97;
+            if(cur.childern[charToIdx] == null) {
+                cur.childern[charToIdx] = new TrieNode();
+            }
+            cur.cnt++;
+            cur = cur.childern[charToIdx];
+        }
+        cur.cnt = 1;
+    }
+
+    public int getMatchedWordsCnt(String query, int wildCardIdx) {
+        TrieNode cur = root;
+        int charToIdx = 0;
+        char c;
+
+        for(int idx = 0; idx < wildCardIdx; idx++) {
+            c = query.charAt(idx);
+            charToIdx = c - 97;
+            if(cur.childern[charToIdx] == null) {
+                return 0;
+            }
+            cur = cur.childern[charToIdx];
+        }
+
+        return cur.cnt;
+    }
+}
