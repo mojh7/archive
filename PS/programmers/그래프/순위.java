@@ -2,6 +2,10 @@
  * 2020-12-18
  * https://programmers.co.kr/learn/courses/30/lessons/49191
  * 프로그래머스 코딩테스트 고득점 Kit 그래프
+ *
+ * 이기는 방향 그래프
+ * 지는 방향 그래프
+ * 각각 플로이드와샬을 통해 경로가 있는 개수의 합이 n-1 이면 순위를 판단할 수 있는 선수라 answer++
  */
 
 class Solution {
