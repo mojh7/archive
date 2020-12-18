@@ -2,6 +2,10 @@
  * 2020-12-18
  * https://programmers.co.kr/learn/courses/30/lessons/49190
  * 프로그래머스 코딩테스트 고득점 Kit 그래프
+시도 1 --- 
+이미 방문한 적 있는 위치(Point)에 접근할 때 가는 방향의 edge가 처음 방문하게 되면 방이 만들어짐.
+그런데 1, 2번만 맞음
+
 테스트 1 〉	통과 (0.59ms, 52.1MB)
 테스트 2 〉	통과 (1.48ms, 52.7MB)
 테스트 3 〉	실패 (1.61ms, 52.7MB)
@@ -12,7 +16,7 @@
 테스트 8 〉	실패 (53.86ms, 64MB)
 테스트 9 〉	실패 (61.63ms, 79MB)
 
-
+시도 2 ---
 https://programmers.co.kr/questions/14646 보고 개선 중인데 코드가 틀린지 1, 2번 테스트만 맞는 중
 위 글에 나온 방법에서 첫 번째 방법만 고려해서 틀렸음.
 
@@ -21,6 +25,19 @@ https://programmers.co.kr/questions/14646 보고 개선 중인데 코드가 틀�
 
 두 번째, 대각선끼리 교차할 때 방이 하나 만들어집니다.
 이때도, 이미 그려졌던 선이 아닌지 확인해야 합니다.
+
+시도 3 ---
+질문하기에 다른 테케에서 틀린 닶이 나와 로직 수정 후 문제 해결
+
+5 2 7에 경우 방이 1개 만들어지는데 이전에 짰던 로직에서는 0으로 나와서 수정하니 맞았음.
+
+추가 테스트케이스
+[6, 5, 2, 7, 1, 4, 2, 4, 6]
+[5, 2, 7, 1, 6, 3]
+[6, 2, 4, 0, 5, 0, 6, 4, 2, 4, 2, 0]
+[6, 0, 3, 0, 5, 2, 6, 0, 3, 0, 5]
+
+4개다 결과 3 나와야 함.
  */
 
 import java.util.HashMap;
@@ -60,20 +77,22 @@ class Solution {
             compressedPos = curPos[Y] * Y_CORRECTION_VALUE + curPos[X];
             nextPoint = coordinates2D.get(compressedPos);
             
-            if(nextPoint != null) {
-                if(!curPoint.visited8Dir[arrow]) {
-                    answer++;
-                    if(arrow % 2 == 1) {
-                        int oddArrowIdx = arrow / 2;
-                        crossedDiagonalPos = compressedPos + Y_CORRECTION_VALUE * DIAGONAL_CHECKING_PROPS[oddArrowIdx][0];
-                        crossedDiagonalArrow = DIAGONAL_CHECKING_PROPS[oddArrowIdx][1];
-                        crossedDiagonalPoint = coordinates2D.get(crossedDiagonalPos);
-                        if(crossedDiagonalPoint != null && crossedDiagonalPoint.visited8Dir[crossedDiagonalArrow]) {
-                            answer++;
-                        }
+            if(!curPoint.visited8Dir[arrow]) {
+                if(nextPoint != null) {
+                    answer++;    
+                }
+                if(arrow % 2 == 1) {
+                    int oddArrowIdx = arrow / 2;
+                    crossedDiagonalPos = compressedPos + Y_CORRECTION_VALUE * DIAGONAL_CHECKING_PROPS[oddArrowIdx][0];
+                    crossedDiagonalArrow = DIAGONAL_CHECKING_PROPS[oddArrowIdx][1];
+                    crossedDiagonalPoint = coordinates2D.get(crossedDiagonalPos);
+                    if(crossedDiagonalPoint != null && crossedDiagonalPoint.visited8Dir[crossedDiagonalArrow]) {
+                        answer++;
                     }
                 }
-            } else {
+            }
+            
+            if(nextPoint == null) {
                 nextPoint = new Point();
                 coordinates2D.put(compressedPos, nextPoint);
             }
