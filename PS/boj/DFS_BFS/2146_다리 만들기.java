@@ -1,5 +1,5 @@
 /*
- * 2021.01.04
+ * 2021-01-04
  * https://www.acmicpc.net/problem/2146
  * 백준 BFS
  *
