@@ -15,6 +15,15 @@
 풀이 참고하여 풀음.
 어떤 특정 건물이 지어지기 전에 필요한 먼저 지어져야 하는 건물들 중에서 가장 오래걸리는 것만
 찾아서 시간을 더해주면 됨.
+
+개선---
+Node class에서 먼저 지어야하는 이전 건물 목록을 담은 List 삭제함
+위상정렬을 하다보니 반대로 어떤 건물이 끝나면 지을 수 있는 다음 건물 목록만 가지고 있어도 되서
+삭제 했는데 유의미한 속도 차이가 안남.
+
+topologicalSort 함수 내에서 o(n)로 indegree가 0인 node를 큐에 먼저 넣어주고
+while문을 돌았는데 입력 받을 때 indegree가 0인 것을 체크해서 미리 queue를 만들고
+함수에 매개변수로 넘겨줘서 실행함. 이 것도 속도 차이 x
  */
 
 import java.io.BufferedReader;
@@ -33,6 +42,7 @@ class Main {
         StringTokenizer st;
 
         int prev;
+        Queue<Node> q = new LinkedList<>();
         int n = Integer.parseInt(br.readLine());
         Node[] nodes = new Node[n + 1];
         for (int idx = 1; idx <= n; idx++) {
@@ -45,13 +55,15 @@ class Main {
             prev = Integer.parseInt(st.nextToken());
             while (prev != -1) {
                 nodes[prev].next.add(nodes[cur]);
-                nodes[cur].prev.add(nodes[prev]);
                 nodes[cur].indegree += 1;
                 prev = Integer.parseInt(st.nextToken());
             }
+            if(nodes[cur].indegree == 0) {
+                q.add(nodes[cur]);
+            }
         }
 
-        topologicalSort(nodes, n);
+        topologicalSort(nodes, q, n);
 
         for (int idx = 1; idx <= n; idx++) {
             bw.write(Integer.toString(nodes[idx].time));
@@ -61,21 +73,15 @@ class Main {
         bw.close();
     }
 
-    public static void topologicalSort(Node[] nodes, int n) {
-        Queue<Node> q = new LinkedList<>();
+    public static void topologicalSort(Node[] nodes, Queue<Node> q, int n) {
         Node cur;
-
-        for(int idx = 1; idx <= n; idx++) {
-            cur = nodes[idx];
-            if(cur.indegree == 0) {
-                q.add(cur);
-            }
-        }
-
         while (!q.isEmpty()) {
             cur = q.poll();
-            cur.calcCompletedTime();
+            cur.time += cur.prevMaxTime;
             for(Node nextNode : cur.next) {
+                if(nextNode.prevMaxTime < cur.time) {
+                    nextNode.prevMaxTime = cur.time;
+                }
                 if(--nextNode.indegree == 0) {
                     q.add(nextNode);
                 };
@@ -85,24 +91,14 @@ class Main {
 }
 
 class Node {
+    int prevMaxTime;
     int time;
     int indegree;
-    LinkedList<Node> prev;
     LinkedList<Node> next;
 
     public Node() {
         indegree = 0;
-        prev = new LinkedList<>();
+        prevMaxTime = 0;
         next = new LinkedList<>();
-    }
-
-    public void calcCompletedTime() {
-        int prevMaxTime = 0;
-        for(Node prevNode : prev) {
-            if(prevMaxTime < prevNode.time) {
-                prevMaxTime = prevNode.time;
-            }
-        }
-        time += prevMaxTime;
     }
 }
