@@ -1,5 +1,4 @@
 /*
- * 틀려서 푸는 중
  * 2021-01-09
  * https://www.acmicpc.net/problem/15997
  * 백준 브루트포스 골드 3
@@ -14,6 +13,12 @@ AAA KOREA 0.1 0.4 0.5
 CCC BBB 0.3 0.6 0.1
 KOREA BBB 0.55 0.25 0.2
 CCC AAA 0.0 1.0 0.0
+
+------------------------------------
+수정 해서 내다가 3번 틀리고 4번 째 때 정답
+6번의 경기가 끝난 후 처리를 할 때 4개의 팀 중 1팀은 1등이 확정이고
+나머지 3개의 팀이 동점이라서 3개의 팀 중 하나만 다음 라운드로 갈 수 있을 때
+그 경기가 일어날 확률에서 1/3f 를 곱해서 더 해줘야되는데 2/3f로 처리해서 더 오바되게 더해져서 틀렸었음
  */
 
 import java.io.BufferedReader;
@@ -45,7 +50,7 @@ class Main {
                     Float.parseFloat(st.nextToken()), Float.parseFloat(st.nextToken()), Float.parseFloat(st.nextToken()));
         }
 
-        dfs(teams, games, 1, 0);
+        dfs(games, 1, 0);
         for(Map.Entry<String, Team> entry : teams.entrySet()) {
             bw.write(String.format("%.10f\n", entry.getValue().percentage));
         }
@@ -53,23 +58,24 @@ class Main {
         bw.close();
     }
 
-    public static void dfs(LinkedHashMap<String, Team> teams, Game[] games, float odds, int round) {
+    public static void dfs(Game[] games, float odds, int round) {
         if(round == 6) {
-            finishLeague(teams, odds);
+            finishLeague(odds);
             return;
         }
         float nextOdds;
         for(int matchResult = 0; matchResult < 3; matchResult++) {
-            nextOdds = odds * games[round].odds[matchResult];
-            if(nextOdds == 0)
+            if(games[round].odds[matchResult] == 0f)
                 continue;
+
+            nextOdds = odds * games[round].odds[matchResult];
             runGame(games[round], matchResult,false);
-            dfs(teams, games, nextOdds, round + 1);
+            dfs(games, nextOdds, round + 1);
             runGame(games[round], matchResult, true);
         }
     }
 
-    public static void finishLeague(LinkedHashMap<String, Team> teams, float odds) {
+    public static void finishLeague(float odds) {
         Arrays.sort(leagueResult, (t1, t2) -> t2.score - t1.score);
         if(leagueResult[0].score > leagueResult[1].score) {
             leagueResult[0].percentage += odds;
@@ -79,17 +85,17 @@ class Main {
                 leagueResult[1].percentage += odds * 0.5f;
                 leagueResult[2].percentage += odds * 0.5f;
             } else {
-                leagueResult[1].percentage += odds * (2 / 3f);
-                leagueResult[2].percentage += odds * (2 / 3f);
-                leagueResult[3].percentage += odds * (2 / 3f);
+                leagueResult[1].percentage += odds * (1f / 3f);
+                leagueResult[2].percentage += odds * (1f / 3f);
+                leagueResult[3].percentage += odds * (1f / 3f);
             }
         } else if(leagueResult[1].score > leagueResult[2].score) {
             leagueResult[0].percentage += odds;
             leagueResult[1].percentage += odds;
         } else if(leagueResult[2].score > leagueResult[3].score) {
-            leagueResult[0].percentage += odds * (2 / 3f);
-            leagueResult[1].percentage += odds * (2 / 3f);
-            leagueResult[2].percentage += odds * (2 / 3f);
+            leagueResult[0].percentage += odds * (2f / 3f);
+            leagueResult[1].percentage += odds * (2f / 3f);
+            leagueResult[2].percentage += odds * (2f / 3f);
         } else {
             leagueResult[0].percentage += odds * 0.5f;
             leagueResult[1].percentage += odds * 0.5f;
