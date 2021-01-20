@@ -189,8 +189,44 @@ public int find(int[] parents, int x) {
 
 ## kruskal
 
+> 간선 E개를 o(nlogn)의 정렬로 정렬하고 간선 갯수만큼 탐색하면 됨.
+ElogE + E 만큼 소요되서 big-o(ElogE)이다.
+> 
+> cycle 생성 여부는 union find로 확인
+>
+> prim 알고리즘이 O(n^2)이라 kruskal은 간선이 적은 경우 적합, 희소 그래프(Sparse Graph) 같은 경우 적합
+
+
+
 ```
+for(Edge edge : edges) {
+    if(selectedEdgesCnt >= n - 1) break;
+    if(find(parents, edge.node1) != find(parents, edge.node2)) {
+        if(costMax < edge.cost) {
+            costMax = edge.cost;
+        }
+        answer += edge.cost;
+        union(parents, edge.node1, edge.node2);
+        selectedEdgesCnt++;
+    }
+}
+
+class Edge implements Comparable<Edge>{
+    int[] node;
+    int cost;
+
+    public Edge(int node1, int node2, int cost) {
+        this.node = new int[]{node1, node2};
+        this.cost = cost;
+    }
+
+    @Override
+    public int compareTo(Edge other) {
+        return this.cost - other.cost;
+    }
+}
 ```
+
 
 [맨 위로](#바로가기)
 
