@@ -1,7 +1,8 @@
 /*
  * 2020-10-24
  * https://www.hackerrank.com/challenges/ctci-connected-cell-in-a-grid/problem?h_l=interview&playlist_slugs%5B%5D=interview-preparation-kit&playlist_slugs%5B%5D=graphs
- *
+ * graphs
+ * 
  * 0과 1로 이루어진 n * m matrix에서 cell의 값이 1인 인접한 cell들의 갯수가 젤 큰 것은?
  * 상하좌우대각선에 있는 경우 인접하다고 판단함.
  */
