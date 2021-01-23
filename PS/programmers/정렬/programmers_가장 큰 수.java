@@ -28,8 +28,55 @@ PriorityQueue<String> pq 에 넣고 우선 순위 높은 순서대로 출력했�
 index의 숫자로 비교함. 9976과 99가 있으면 3번째 포문에서 좌측 숫자에 7과 우측 숫자에서 두번 째 index 9와
 비교하여 99가 먼저 오도록 함.
 
+
+---- 질문하기 글 반례 보고 해결
+반례
+input : [0, 0, 0, 0, 0]
+return : "0"
+이전 코드로는 "00000" 나옴
+고쳤더니 테스트 11 통과 1~6 실패
+
+반례
+input : [40, 403]
+return : "40403"
+이전 틀렸던 코드로는 "40340"이 나온다
  */
 
+
+// 해결 코드
+
+import java.util.PriorityQueue;
+
+class Solution {
+    public String solution(int[] numbers) {
+        String answer;
+        StringBuilder sb = new StringBuilder();
+        PriorityQueue<String> pq = new PriorityQueue<>((s1, s2) -> {
+            for(int idx = 0; idx < 4; idx++) {
+                if(s1.charAt(idx % s1.length()) == s2.charAt(idx % s2.length())) continue;
+                return s1.charAt(idx % s1.length()) - s2.charAt(idx % s2.length()) > 0 ? -1 : 1;
+            }
+            return s1.length() - s2.length();
+        });
+        
+        for(int number : numbers) {
+            pq.add(Integer.toString(number));
+        }
+        
+        while(!pq.isEmpty()) {
+            sb.append(pq.poll());
+        }
+        answer = sb.toString();
+        if(answer.charAt(0) == '0') {
+            return "0";
+        }
+        
+        return answer;
+    }
+}
+
+
+// 틀린 코드
 
 import java.util.PriorityQueue;
 
